@@ -1,0 +1,49 @@
+{% extends 'base.html' %} 
+{% block title %} 
+    Clinic - Clinic Management 
+{% endblock %} 
+{% block content %}
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+  <h1 style="margin: 0;">Clinics List</h1>
+
+
+  <button class="button" onclick="window.location.href='{% url 'add_clinic' %}'" style="color: white;">
+    + Add Clinic
+</button>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Phone Number</th>
+      <th>City</th>
+      <th>State</th>
+      <th>Number of Doctors</th>
+      <th>Number of Patients</th>
+      <th>Details</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for details in clinic_details %}
+    <tr>
+      <td>{{ details.clinic.name }}</td>
+      <td>{{ details.clinic.phone_number }}</td>
+      <td>{{ details.clinic.city }}</td>
+      <td>{{ details.clinic.state }}</td>
+      <td>{{ details.doctor_count }}</td>
+      <td>{{ details.patient_count }}</td>
+      <td>
+        <a href="{% url 'clinic_detail' details.clinic.id %}">View Details</a>
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="9">No clinic found.</td>
+    </tr>
+    {% endfor %}
+</tbody>
+
+</table>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends 'base.html' %} 
+{% block title %} 
+    Doctor - Clinic Management 
+{% endblock %} 
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+  <h1 style="margin: 0;">Doctors List</h1>
+
+  <button class="button" onclick="window.location.href='{% url 'add_doctor' %}'" style="color: white;">
+    + Add Doctor
+</button>
+</div>
+<table>
+  <thead>
+    <tr>
+      <th>NPI</th>
+      <th>Name</th>
+      <th>Specialties</th>
+      <th>Number of Clinics</th>
+      <th>Number of Patients</th>
+      <th>Details</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for detail in doctor_details %}
+    <tr>
+      <td>{{ detail.doctor.NPI }}</td>
+      <td>{{ detail.doctor.name }}</td>
+      <td>
+        {% for specialty in detail.doctor.specialties.all %}
+          {{ specialty.name }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+      </td> 
+      <td>{{ detail.clinic_count }}</td>
+      <td>{{ detail.patient_count }}</td>
+      <td>
+        <a href="{% url 'doctor_detail' detail.doctor.id %}">View Details</a>
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="9">No doctor found.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'base.html' %} 
+
+{% block title %} 
+  Patient - Clinic Management 
+{% endblock %} 
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+  <h1 style="margin: 0;">Patient List</h1>
+
+  <button class="button" onclick="window.location.href='{% url 'add_patient' %}'" style="color: white;">
+    + Add Patient
+</button>
+</div>
+
+<table class="patients-table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Date of Birth</th>
+      <th>Last Visit Date</th>
+      <th>Last Visit Doctor</th>
+      <th>Last Visit Procedure</th>
+      <th>Next Appointment Date</th>
+      <th>Next Appointment Doctor</th>
+      <th>Next Appointment Procedure</th>
+      <th>Details</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for detail in patient_details %}
+    <tr>
+      <td>{{ detail.patient.name }}</td>
+      <td>{{ detail.patient.date_of_birth|date:"Y-m-d" }}</td>
+      <td>
+        {% if detail.last_visit_date %}
+          {{ detail.last_visit_date|date:"Y-m-d H:i" }}
+        {% else %}
+          No past visits
+        {% endif %}
+      </td>
+      <td>{{ detail.last_visit_doctor|default:"-" }}</td>
+      <td>{{ detail.last_visit_procedure|default:"-" }}</td>
+      <td>
+        {% if detail.next_appointment_date %}
+          {{ detail.next_appointment_date|date:"Y-m-d H:i" }}
+        {% else %}
+          No upcoming appointments
+        {% endif %}
+      </td>
+      <td>{{ detail.next_appointment_doctor|default:"-" }}</td>
+      <td>{{ detail.next_appointment_procedure|default:"-" }}</td>
+      <td>
+        <a href="{% url 'patient_detail' detail.patient.id %}" class="details-link">View Details</a>
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="9">No patients found.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Add Clinic - Clinic Management
+{% endblock %}
+
+{% block content %}
+<div class="clinic-container">
+  <h1 class="form-title titleh1 ">Add a New Clinic</h1>
+
+  <form method="POST" action="{% url 'add_clinic' %}" class="clinic-form">
+    {% csrf_token %}
+    
+    <div class="form-group">
+      <label for="name" class="form-label">Clinic Name:</label>
+      <input type="text" name="name" id="name" class="form-input" required>
+    </div>
+    
+    <div class="form-group">
+      <label for="phone_number" class="form-label">Phone Number:</label>
+      <input type="text" name="phone_number" id="phone_number" class="form-input" required>
+    </div>
+
+    <div class="form-group">
+      <label for="email" class="form-label">Email:</label>
+      <input type="email" name="email" id="email" class="form-input" required />
+    </div>
+    
+    <div class="form-group">
+      <label for="city" class="form-label">City:</label>
+      <input type="text" name="city" id="city" class="form-input" required>
+    </div>
+    
+    <div class="form-group">
+      <label for="state" class="form-label">State:</label>
+      <input type="text" name="state" id="state" class="form-input" required>
+    </div>
+    
+    <div class="form-group">
+      <button type="submit" class="form-button">Add Clinic</button>
+    </div>
+  </form>
+</div>
+
+
+{% endblock %}

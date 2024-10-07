@@ -1,0 +1,124 @@
+{% extends 'base.html' %} 
+{% block title %} 
+    Doctor - Clinic Management 
+{% endblock %} 
+
+{% block content %}
+<h1 class="titleh1">Doctor Details</h1>
+
+
+<div class="clinic-container">
+  
+  <div id="doctor-display" class="doctor-section">
+    <p><strong>NPI:</strong> <span id="doctor-npi">{{ doctor.NPI }}</span></p>
+    <p><strong>Name:</strong> <span id="doctor-name">{{ doctor.name }}</span></p>
+    <p><strong>Email:</strong> <span id="doctor-email">{{ doctor.email }}</span></p>
+    <p><strong>Phone Number:</strong> <span id="doctor-phone">{{ doctor.phone_number }}</span></p>
+    <p><strong>Specialty:</strong> <span id="doctor-specialty">{{ doctor.specialties.first.name }}</span></p>
+    <button id="edit-btn" class="button" onclick="toggleEdit()">Edit</button>
+  </div>
+
+  
+  <div id="doctor-edit" class="doctor-section" style="display:none;">
+    <form method="POST" class="doctor-form">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="edit-npi" class="form-label">NPI:</label>
+        <input type="text" name="npi" id="edit-npi" class="form-input" value="{{ doctor.NPI }}" required />
+      </div>
+      <div class="form-group">
+        <label for="edit-name" class="form-label">Name:</label>
+        <input type="text" name="name" id="edit-name" class="form-input" value="{{ doctor.name }}" required />
+      </div>
+      <div class="form-group">
+        <label for="edit-email" class="form-label">Email:</label>
+        <input type="email" name="email" id="edit-email" class="form-input" value="{{ doctor.email }}" required />
+      </div>
+      <div class="form-group">
+        <label for="edit-phone" class="form-label">Phone Number:</label>
+        <input type="text" name="phone_number" id="edit-phone" class="form-input" value="{{ doctor.phone_number }}" required />
+      </div>
+      <div class="form-group">
+        <label for="edit-specialty" class="form-label">Specialty:</label>
+        <select name="specialties" id="edit-specialty" class="form-input" required>
+          {% for specialty in specialties %}
+            <option value="{{ specialty.id }}" {% if doctor.specialties.first.id == specialty.id %}selected{% endif %}>{{ specialty.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="form-button">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<h2>Affiliated Clinics</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Clinic Name</th>
+      <th>Phone Number</th>
+      <th>City</th>
+      <th>State</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for clinic in affiliated_clinics %}
+    <tr>
+      <td>{{ clinic.name }}</td>
+      <td>{{ clinic.phone_number }}</td>
+      <td>{{ clinic.city }}</td>
+      <td>{{ clinic.state }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="4">No affiliated clinics.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+<h2>Affiliated Patients</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Patient Name</th>
+      <th>Email</th>
+      <th>Phone Number</th>
+      <th>Date of Birth</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for patient in patients %}
+    <tr>
+      <td>{{ patient.name }}</td>
+      <td>{{ patient.phone_number }}</td>
+      <td>{{ patient.address }}</td>
+      <td>{{ patient.date_of_birth }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="3">No affiliated patients.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+  
+  function toggleEdit() {
+    var displaySection = document.getElementById('doctor-display');
+    var editSection = document.getElementById('doctor-edit');
+    if (displaySection.style.display === 'none') {
+      displaySection.style.display = 'block';
+      editSection.style.display = 'none';
+    } else {
+      displaySection.style.display = 'none';
+      editSection.style.display = 'block';
+    }
+  }
+</script>
+
+{% endblock %}

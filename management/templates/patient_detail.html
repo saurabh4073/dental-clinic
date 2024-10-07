@@ -1,0 +1,284 @@
+{% extends 'base.html' %} 
+
+{% block title %} 
+    Patient - Clinic Management 
+{% endblock %}
+
+{% block content %}
+
+
+<div class="clinic-container">
+    <h1 class="titleh1">Patient Details </h1>
+  <div id="patient-display" class="patient-section">
+    <p><strong>Name:</strong> <span id="patient-name">{{ patient.name }}</span></p>
+    <p><strong>Address:</strong> <span id="patient-address">{{ patient.address }}</span></p>
+    <p><strong>Phone Number:</strong> <span id="patient-phone">{{ patient.phone_number }}</span></p>
+    <p><strong>Date of Birth:</strong> <span id="patient-dob">{{ patient.date_of_birth }}</span></p>
+    <p><strong>Last 4 Digits of SSN:</strong> <span id="patient-ssn">{{ patient.last_4_digits_ssn }}</span></p>
+    <p><strong>Gender:</strong> <span id="patient-gender">{{ patient.gender }}</span></p>
+    <button id="edit-btn" class="button" onclick="toggleEdit()">Edit</button>
+  </div>
+
+
+  <div id="patient-edit" class="patient-section" style="display:none;">
+    <form method="POST" class="patient-form">
+      {% csrf_token %}
+      
+      <div class="form-group">
+        <label for="edit-name" class="form-label">Name:</label>
+        <input type="text" name="name" id="edit-name" class="form-input" value="{{ patient.name }}" required />
+      </div>
+      
+      <div class="form-group">
+        <label for="edit-address" class="form-label">Address:</label>
+        <textarea name="address" id="edit-address" class="form-input" required>{{ patient.address }}</textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="edit-phone" class="form-label">Phone Number:</label>
+        <input type="text" name="phone_number" id="edit-phone" class="form-input" value="{{ patient.phone_number }}" required />
+      </div>
+
+      <div class="form-group">
+        <label for="edit-dob" class="form-label">Date of Birth:</label>
+        <input type="date" name="date_of_birth" id="edit-dob" class="form-input" value="{{ patient.date_of_birth|date:'Y-m-d' }}" required />
+      </div>
+      
+      <div class="form-group">
+        <label for="edit-ssn" class="form-label">Last 4 Digits of SSN:</label>
+        <input type="text" name="last_4_digits_ssn" id="edit-ssn" class="form-input" value="{{ patient.last_4_digits_ssn }}" required maxlength="4" />
+      </div>
+
+      <div class="form-group">
+        <label for="edit-gender" class="form-label">Gender:</label>
+        <select name="gender" id="edit-gender" class="form-input" required>
+          <option value="Male" {% if patient.gender == 'Male' %}selected{% endif %}>Male</option>
+          <option value="Female" {% if patient.gender == 'Female' %}selected{% endif %}>Female</option>
+          <option value="Other" {% if patient.gender == 'Other' %}selected{% endif %}>Other</option>
+        </select>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="form-button">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+    <h2 class="titleh1">Patient's Visits</h2>
+</div>
+{% if visits %}
+    <table class="visit-table">
+    <thead>
+        <tr>
+        <th>Visit Date & Time</th>
+        <th>Clinic Name</th>
+        <th>Doctor Name</th>
+        <th>Procedures Done</th>
+        <th>Doctor's Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for visit in visits %}
+        <tr>
+        <td>{{ visit.visit_date }}</td>
+        <td>{{ visit.clinic.name }}</td>
+        <td>{{ visit.doctor.name }}</td>
+        <td>{{ visit.procedures_done }}</td>
+        <td>{{ visit.doctor_notes }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+{% else %}
+<p >No previous visits</p>
+{% endif %}
+<br><br>
+
+<div id="schedule-appointment-table">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+        <h2 class="titleh1">Next Scheduled Appointments</h2>
+      
+        
+        <button id="schedule-appointment-btn" class="button" onclick="toggleAppointmentForm()">Schedule Appointment</button>
+      </div>
+    {% if next_appointments %}
+    <table class="appointment-table">
+        <thead>
+            <tr>
+                <th>Date Time</th>                
+                <th>Clinic</th>
+                <th>Doctor</th>
+                <th>Procedure</th>
+                <th>Date Booked</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for appointment in next_appointments %}
+            <tr>
+                <td>{{ appointment.visit_date }}</td>
+                <td>{{ appointment.clinic.name }}</td>
+                <td>{{ appointment.doctor.name }}</td>
+                <td>{{ appointment.procedures_done }}</td>
+                <td>{{ appointment.booking_date }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No upcoming appointments scheduled.</p>
+    {% endif %}
+</div>
+
+<div id="schedule-appointment-form" style="display:none;">
+    <h2 class="titleh1" >Schedule an Appointment</h2>
+    <form method="POST" class="clinic-container">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="specialty">Select Procedure (Specialty):</label>
+            <select id="specialty" name="specialty" class="form-input" onchange="fetchClinicsAndDoctors()">
+                <option value="">Select a specialty</option>
+                {% for specialty in specialties %}
+                    <option value="{{ specialty.id }}">{{ specialty.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="clinic">Select Clinic:</label>
+            <select id="clinic" name="clinic" class="form-input" onchange="updateDoctors()">
+                <option value="">Select a clinic</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="doctor">Select Doctor:</label>
+            <select id="doctor" name="doctor" class="form-input" onchange="updateAvailableSlots()">
+                <option value="">Select a doctor</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="date">Select Date:</label>
+            <input type="date" id="date" name="date" class="form-input" onchange="updateAvailableSlots()">
+        </div>
+        <div class="form-group">
+            <label for="time">Select Time Slot:</label>
+            <select id="time" name="time" class="form-input">
+                <option value="">Select a time</option>
+            </select>
+        </div>
+        <div class="form-actions" style="text-align: center;">
+            <button type="submit" class="form-button" style="margin: 0 10px;">Schedule</button>
+            <button type="button" class="form-button" onclick="toggleAppointmentForm()" style="margin: 0 10px;">Cancel</button>
+        </div>
+    </form>
+</div>
+
+
+<script>
+    
+    function toggleEdit() {
+        var displaySection = document.getElementById('patient-display');
+        var editSection = document.getElementById('patient-edit');
+        if (displaySection.style.display === 'none') {
+            displaySection.style.display = 'block';
+            editSection.style.display = 'none';
+        } else {
+            displaySection.style.display = 'none';
+            editSection.style.display = 'block';
+        }
+    }
+
+    function fetchClinicsAndDoctors() {
+        const specialtyId = document.getElementById("specialty").value;
+        if (specialtyId) {
+            fetch(`/fetch_clinics_doctors/${specialtyId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    const clinicSelect = document.getElementById("clinic");
+                    clinicSelect.innerHTML = '<option value="">Select a clinic</option>';
+                    document.getElementById("doctor").innerHTML = '<option value="">Select a doctor</option>';
+                    document.getElementById("time").innerHTML = '<option value="">Select a time</option>';
+
+                    data.doctors.forEach(doctorData => {
+                        doctorData.clinics.forEach(clinic => {
+                            clinicSelect.innerHTML += `<option value="${clinic.id}" data-doctors='${JSON.stringify(doctorData)}'>${clinic.name}</option>`;
+                        });
+                    });
+                });
+        }
+    }
+
+    function updateDoctors() {
+        const clinicSelect = document.getElementById("clinic");
+        const doctorSelect = document.getElementById("doctor");
+        const selectedClinicData = clinicSelect.options[clinicSelect.selectedIndex].getAttribute('data-doctors');
+        
+        doctorSelect.innerHTML = '<option value="">Select a doctor</option>';
+        if (selectedClinicData) {
+            const clinicData = JSON.parse(selectedClinicData);
+            doctorSelect.innerHTML += `<option value="${clinicData.doctor.id}" data-schedules='${JSON.stringify(clinicData.schedules)}'>${clinicData.doctor.name}</option>`;
+        }
+    }
+
+    function updateAvailableSlots() {
+        const doctorSelect = document.getElementById("doctor");
+        const selectedDoctorData = doctorSelect.options[doctorSelect.selectedIndex].getAttribute('data-schedules');
+        const timeSelect = document.getElementById("time");
+        const selectedDate = document.getElementById("date").value;
+
+        timeSelect.innerHTML = '<option value="">Select a time</option>';
+    
+        if (selectedDoctorData && selectedDate) {
+            const schedules = JSON.parse(selectedDoctorData);
+            const selectedDateObj = new Date(selectedDate + "T00:00:00");
+            const dayName = selectedDateObj.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'America/Phoenix' }).toLowerCase();
+            
+            schedules.forEach(schedule => {
+                const workingDay = schedule.working_day.toLowerCase();
+                const startTime = schedule.start_time;
+                const endTime = schedule.end_time;
+
+                if (workingDay === dayName) {
+                    const timeSlots = generateTimeSlots(startTime, endTime, 'America/Phoenix');
+                    timeSlots.forEach(time => {
+                        timeSelect.innerHTML += `<option value="${time}">${time}</option>`;
+                    });
+                }
+            });
+        }
+    }
+    
+    function generateTimeSlots(startTime, endTime, timeZone) {
+        const start = new Date(`1970-01-01T${startTime}:00`);
+        const end = new Date(`1970-01-01T${endTime}:00`);
+        const slots = [];
+        console.log(`startTime ${startTime} endTime ${endTime}`);
+    
+        for (let dt = start; dt < end; dt.setMinutes(dt.getMinutes() + 30)) {
+            slots.push(
+                dt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone })
+            );
+        }
+    
+        return slots;
+    }
+
+    function toggleAppointmentForm() {
+        const formSection = document.getElementById('schedule-appointment-form');
+        formSection.style.display = formSection.style.display === 'none' ? 'block' : 'none';
+        document.getElementById('schedule-appointment-table').style.display = 'none';
+      }
+
+      function handleFormSubmit() {
+        setTimeout(() => {
+          document.getElementById('schedule-appointment-form').style.display = 'none';
+          document.getElementById('schedule-appointment-table').style.display = 'block';
+        }, 200); 
+        return true; 
+      }
+</script>
+
+  
+
+{% endblock %}

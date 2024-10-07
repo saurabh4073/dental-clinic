@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% block title %}Clinic - Management{% endblock %}
+{% block content %}
+
+<div class="clinic-container">
+  <div id="clinic-display" class="clinic-section">
+    <h1 class="titleh1">{{ clinic.name }} </h1>
+    <p><strong>City:</strong> <span id="clinic-city">{{ clinic.city }}</span></p>
+    <p><strong>State:</strong> <span id="clinic-state">{{ clinic.state }}</span></p>
+    <p><strong>Phone Number:</strong> <span id="clinic-phone">{{ clinic.phone_number }}</span></p>
+    <p><strong>Email:</strong> <span id="clinic-email">{{ clinic.email }}</span></p>
+    <button id="edit-btn" class="button" onclick="toggleEdit()">Edit</button>
+  </div>
+
+  <div id="clinic-edit" class="clinic-section" style="display:none;">
+    <form method="POST" class="clinic-form">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="edit_clinic">
+      <div class="form-group">
+        <label for="edit-name" class="form-label">Name:</label>
+        <input type="text" name="name" id="edit-name" class="form-input" value="{{ clinic.name }}" required />
+      </div>
+      <div class="form-group">
+        <label for="edit-city" class="form-label">City:</label>
+        <input type="text" name="city" id="edit-city" class="form-input" value="{{ clinic.city }}" required />
+      </div>
+      <div class="form-group">
+        <label for="edit-state" class="form-label">State:</label>
+        <input type="text" name="state" id="edit-state" class="form-input" value="{{ clinic.state }}" required />
+      </div>
+      <div class="form-group">
+        <label for="edit-phone" class="form-label">Phone Number:</label>
+        <input type="text" name="phone_number" id="edit-phone" class="form-input" value="{{ clinic.phone_number }}" required />
+      </div>
+      <div class="form-group">
+        <label for="edit-email" class="form-label">Email:</label>
+        <input type="email" name="email" id="edit-email" class="form-input" value="{{ clinic.email }}" required />
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="form-button">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<h2>Affiliated Doctors</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Office Address</th>
+      <th>Working Schedule</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for schedule in affiliated_schedules %}
+    <tr>
+      <td>{{ schedule.doctor.name }}</td>
+      <td>{{ schedule.office_address }}</td>
+      <td>{{ schedule.working_day }}: {{ schedule.start_time }} - {{ schedule.end_time }}</td>
+      <td>
+        <form method="POST" style="display:inline;">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="remove_doctor">
+          <input type="hidden" name="doctor_id" value="{{ schedule.doctor.id }}">
+          <button type="submit">Remove</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+    
+    <tr>
+      <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add_doctor">
+        
+        <td colspan="1">
+          <select name="new_doctor_id" required>
+            <option value="">Select a Doctor</option>
+            {% for doctor in all_doctors %}
+              <option value="{{ doctor.id }}">{{ doctor.name }}</option>
+            {% endfor %}
+          </select>
+        </td>
+        
+        <td colspan="1">
+          <input type="text" name="office_address" placeholder="Office Address" required>
+        </td>
+        
+        <td colspan="1">
+          <select name="working_day" required>
+            <option value="Sunday">Sunday</option>
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+            <option value="Saturday">Saturday</option>
+          </select>
+          <input type="time" name="start_time" required>
+          <input type="time" name="end_time" required>
+        </td>
+
+        <td colspan="1">
+          <button type="submit">Add Doctor</button>
+        </td>
+      </form>
+    </tr>
+  </tbody>
+</table>
+
+<script>
+  function toggleEdit() {
+    var displaySection = document.getElementById('clinic-display');
+    var editSection = document.getElementById('clinic-edit');
+    if (displaySection.style.display === 'none') {
+      displaySection.style.display = 'block';
+      editSection.style.display = 'none';
+    } else {
+      displaySection.style.display = 'none';
+      editSection.style.display = 'block';
+    }
+  }
+</script>
+
+{% endblock %}
