@@ -31,12 +31,11 @@ This platform manages clinics, doctors, patients, and their relationships. It in
    - Install and configure PostgreSQL.
    - Create a database and user for the application, then set up the environment variables in an `.env` file (use `.env.example` as a template):
      ```plaintext
-     DJANGO_SECRET_KEY=your_secret_key
-     DATABASE_NAME=your_db_name
-     DATABASE_USER=your_db_user
-     DATABASE_PASSWORD=your_db_password
-     DATABASE_HOST=localhost
-     DATABASE_PORT=5432
+     DB_NAME=your_db_name
+     DB_USER=your_db_user
+     DB_PASSWORD=your_db_password
+     DB_HOST=localhost
+     DB_PORT=5432
      ```
 
 4. **Apply database migrations:**
